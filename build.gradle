@@ -1,3 +1,9 @@
+buildscript {
+	ext {
+		restdocsVersion = '0.19.2'
+	}
+}
+
 plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.3.2'
@@ -18,6 +24,7 @@ configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
 	}
+	asciidoctorExt
 }
 
 repositories {
@@ -31,22 +38,50 @@ ext {
 dependencies {
 //	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 //	runtimeOnly 'com.mysql:mysql-connector-j'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
 	testImplementation 'org.springframework.security:spring-security-test'
+
+	asciidoctorExt 'org.springframework.restdocs:spring-restdocs-asciidoctor'
+	testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
+
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 tasks.named('test') {
 	outputs.dir snippetsDir
-	useJUnitPlatform()
+//	useJUnitPlatform()
 }
 
 tasks.named('asciidoctor') {
+	configurations 'asciidoctorExt'
+	baseDirFollowsSourceFile()
 	inputs.dir snippetsDir
 	dependsOn test
 }
+
+asciidoctor.doFirst { // asciidoctor Task가 수행될 때 가장 먼저 수행
+	delete file('src/main/resources/static/docs')
+}
+
+tasks.register('copyDocument', Copy) { // 생성된 html 파일을 옮긴다
+	dependsOn asciidoctor // Gradle의 asciidoctor Task 이후 수행
+	from file("${asciidoctor.outputDir}")
+	into file("src/main/resources/static/docs")
+}
+
+build {
+	dependsOn copyDocument // build 이후 html 파일 복사
+}
+
+bootJar {
+	dependsOn asciidoctor
+	from("${asciidoctor.outputDir}") {
+		into 'static/docs'
+	}
+}
+
