@@ -41,8 +41,8 @@ dependencies {
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
 	// DB
-//	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-//	runtimeOnly 'com.mysql:mysql-connector-j'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	runtimeOnly 'com.mysql:mysql-connector-j'
 
 	// sprint security
 	implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -74,12 +74,12 @@ tasks.named('asciidoctor') {
 	dependsOn test
 }
 
-asciidoctor.doFirst { // asciidoctor Task가 수행될 때 가장 먼저 수행
+asciidoctor.doFirst { // asciidoctor Task 수행될 때 가장 먼저 수행
 	delete file('src/main/resources/static/docs')
 }
 
 tasks.register('copyDocument', Copy) { // 생성된 html 파일을 옮긴다
-	dependsOn asciidoctor // Gradle의 asciidoctor Task 이후 수행
+	dependsOn asciidoctor // Gradle asciidoctor Task 이후 수행
 	from file("${asciidoctor.outputDir}")
 	into file("src/main/resources/static/docs")
 }
