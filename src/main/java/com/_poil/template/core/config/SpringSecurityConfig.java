@@ -44,6 +44,7 @@ public class SpringSecurityConfig {
         // AUTHORIZE POLICY
         http.authorizeHttpRequests(
             request -> request.requestMatchers("/docs/*").permitAll()
+                .requestMatchers("/*").permitAll()
                 .anyRequest().authenticated());
 
         // SESSION POLICY
